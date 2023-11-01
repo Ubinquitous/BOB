@@ -3,14 +3,12 @@ import * as S from './HomeLayout.style'
 import MealType from '@/types/meal.type'
 import axios from 'axios'
 import { useQuery } from 'react-query'
-import getDate from '@/utils/getDate'
 import Left from 'assets/left.svg'
 import Right from 'assets/right.svg'
-import dateParser from '@/utils/dateParser'
-import parseDate from '@/utils/parseDate'
+import { getChangedDate, getNowDate, getParsedDate, } from '@/utils'
 
 const HomeLayout = () => {
-	const [date, setDate] = React.useState(getDate())
+	const [date, setDate] = React.useState(getNowDate())
 	const [meal, setMeal] = React.useState<MealType[]>()
 
 	const onAsyncGetMealInfo = async () => {
@@ -35,11 +33,11 @@ const HomeLayout = () => {
 	})
 
 	const onClickPlusDate = () => {
-		setDate(parseDate({ date, type: 'ADD' }))
+		setDate(getChangedDate({ date, type: 'ADD' }))
 	}
 
 	const onClickMinusDate = () => {
-		setDate(parseDate({ date, type: 'MINUS' }))
+		setDate(getChangedDate({ date, type: 'MINUS' }))
 	}
 
 	React.useEffect(() => {
@@ -50,7 +48,7 @@ const HomeLayout = () => {
 		<S.HomeLayouts>
 			<S.ArrowImage onClick={onClickMinusDate} src={Left} alt="" width={32} />
 			<S.HomeContainer>
-				<S.HomeContainerTitle>{dateParser(date)}</S.HomeContainerTitle>
+				<S.HomeContainerTitle>{getParsedDate(date)}</S.HomeContainerTitle>
 				{meal &&
 					meal.map((m, index) => (
 						<S.HomeContainerMealBox key={index}>
