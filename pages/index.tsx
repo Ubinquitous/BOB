@@ -1,13 +1,8 @@
-import HomeLayout from '@/layouts/HomeLayout'
-import MealType from '@/types/meal.type'
-import React from 'react'
-
-interface HomePropsType {
-	meal: MealType[]
-}
+import HomeLayout from "@/layouts/HomeLayout";
+import React from "react";
 
 const Home = () => {
-	return <HomeLayout />
-}
+  return <HomeLayout />;
+};
 
-export default Home
+export default Home;

@@ -1,65 +1,108 @@
-import React from 'react'
-import * as S from './HomeLayout.style'
-import MealType from '@/types/meal.type'
-import axios from 'axios'
-import { useQuery } from 'react-query'
-import Left from 'assets/left.svg'
-import Right from 'assets/right.svg'
-import { getChangedDate, getNowDate, getParsedDate, } from '@/utils'
+import React, { useState } from "react";
+import * as S from "./HomeLayout.style";
+import MealType from "@/types/meal.type";
+import axios from "axios";
+import { useQuery } from "react-query";
+import Left from "assets/left.svg";
+import Right from "assets/right.svg";
+import useDate from "@/hooks/useDate";
+import Storage from "@/util/Storage";
+import { useRouter } from "next/navigation";
 
 const HomeLayout = () => {
-	const [date, setDate] = React.useState(getNowDate())
-	const [meal, setMeal] = React.useState<MealType[]>()
+  const { getParseDate, getCurrentDate, getDayOfWeek, setDay } = useDate();
+  const [currentDate, setCurrentDate] = React.useState(getCurrentDate());
+  const [meal, setMeal] = React.useState<MealType[]>();
+  const router = useRouter();
 
-	const onAsyncGetMealInfo = async () => {
-		return (
-			await axios.get(
-				`https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=94761be062484942bf49541719b7d4ab&Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE=C10&SD_SCHUL_CODE=7150658&MLSV_YMD=${date}`
-			)
-		).data
-	}
+  const [color, setColor] = useState("");
+  const [boxColor, setBoxColor] = useState("");
+  const [align, setAlign] = useState("");
 
-	const { refetch } = useQuery('meal', onAsyncGetMealInfo, {
-		onSuccess: (data) => {
-			try {
-				setMeal(data.mealServiceDietInfo[1].row)
-			} catch (err) {
-				setMeal(undefined)
-			}
-		},
-		onError: (err) => {
-			console.log(err)
-		},
-	})
+  React.useEffect(() => {
+    setAlign(Storage.getItem("align") || "horizontal");
+    setColor(Storage.getItem("theme") || "#ffe5fb");
+    setBoxColor(Storage.getItem("box_theme") || "#FFFFFF");
+  }, [Storage, color, boxColor, align]);
 
-	const onClickPlusDate = () => {
-		setDate(getChangedDate({ date, type: 'ADD' }))
-	}
+  const onAsyncGetMealInfo = async () => {
+    return (
+      await axios.get(
+        `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=94761be062484942bf49541719b7d4ab&Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE=C10&SD_SCHUL_CODE=7150658&MLSV_YMD=${currentDate}`
+      )
+    ).data;
+  };
 
-	const onClickMinusDate = () => {
-		setDate(getChangedDate({ date, type: 'MINUS' }))
-	}
+  const { refetch } = useQuery("meal", onAsyncGetMealInfo, {
+    onSuccess: (data) => {
+      try {
+        setMeal(data.mealServiceDietInfo[1].row);
+      } catch (err) {
+        setMeal(undefined);
+      }
+    },
+    onError: (err) => {
+      console.log(err);
+    },
+  });
 
-	React.useEffect(() => {
-		refetch()
-	}, [date, refetch])
+  const handleIncreaseDay = () => {
+    setCurrentDate((prev) => setDay(1, prev));
+  };
 
-	return (
-		<S.HomeLayouts>
-			<S.ArrowImage onClick={onClickMinusDate} src={Left} alt="" width={32} />
-			<S.HomeContainer>
-				<S.HomeContainerTitle>{getParsedDate(date)}</S.HomeContainerTitle>
-				{meal &&
-					meal.map((m, index) => (
-						<S.HomeContainerMealBox key={index}>
-							<S.HomeContainerMealTitle>{m.MMEAL_SC_NM}</S.HomeContainerMealTitle>
-							<S.HomeContainerMealInfoBox>{m.DDISH_NM.replace(/<br\/>/gi, '\n').replace(/\((.*)\)/gi, '')}</S.HomeContainerMealInfoBox>
-						</S.HomeContainerMealBox>
-					))}
-			</S.HomeContainer>
-			<S.ArrowImage onClick={onClickPlusDate} src={Right} alt="" width={32} />
-		</S.HomeLayouts>
-	)
-}
+  const handleDecreaseDay = () => {
+    setCurrentDate((prev) => setDay(-1, prev));
+  };
 
-export default HomeLayout
+  React.useEffect(() => {
+    refetch();
+  }, [currentDate, refetch]);
+
+  React.useEffect(() => {
+    const handleSetDateKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") handleDecreaseDay();
+      if (e.key === "ArrowRight") handleIncreaseDay();
+    };
+
+    window.addEventListener("keydown", handleSetDateKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleSetDateKeyDown);
+    };
+    // eslint-disable-next-line
+  }, []);
+
+  return (
+    <S.HomeLayouts color={color}>
+      <S.ArrowImage onClick={handleDecreaseDay} src={Left} alt="" width={32} />
+      <S.HomeContainer color={boxColor}>
+        <S.SettingButton onClick={() => router.push("/setting")}>
+          세팅하깅
+        </S.SettingButton>
+        <S.HomeContainerTitle>{getParseDate(currentDate)}</S.HomeContainerTitle>
+        <S.MealBox align={align}>
+          {meal &&
+            meal.map((m, index) => (
+              <S.HomeContainerMealBox key={index}>
+                <S.HomeContainerMealTitle color={color}>
+                  {m.MMEAL_SC_NM}
+                </S.HomeContainerMealTitle>
+                <S.HomeContainerMealInfoBox>
+                  {align === "vertical"
+                    ? m.DDISH_NM.replaceAll("<br/>", "\n").replace(
+                        /\((.*)\)/gi,
+                        ""
+                      )
+                    : m.DDISH_NM.replaceAll("<br/>", "\n")
+                        .replace(/\((.*)\)/gi, "")
+                        .replaceAll("\n", "\t")}
+                </S.HomeContainerMealInfoBox>
+              </S.HomeContainerMealBox>
+            ))}
+        </S.MealBox>
+      </S.HomeContainer>
+      <S.ArrowImage onClick={handleIncreaseDay} src={Right} alt="" width={32} />
+    </S.HomeLayouts>
+  );
+};
+
+export default HomeLayout;
