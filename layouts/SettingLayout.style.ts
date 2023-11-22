@@ -9,10 +9,11 @@ export const SettingLayout = styled.div<{ color: string }>`
   align-items: center;
 `;
 
-export const Container = styled.div<{ color: string }>`
+export const Container = styled.div<{ color: string; textColor: string }>`
   width: 50%;
   height: 70%;
   background-color: ${({ color }) => color};
+  color: ${({ textColor }) => textColor};
   display: flex;
   align-items: center;
   justify-content: center;
