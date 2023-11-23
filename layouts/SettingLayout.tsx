@@ -10,6 +10,7 @@ const SettingLayout = () => {
   );
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
   const [displayBoxColorPicker, setDisplayBoxColorPicker] = useState(false);
+  const [displayTextColorPicker, setDisplayTextColorPicker] = useState(false);
   const router = useRouter();
   const [customColor, setCustomColor] = useState({
     color: Storage.getItem("theme") || "#FFE5FB",
@@ -19,8 +20,13 @@ const SettingLayout = () => {
     color: Storage.getItem("box_theme") || "#FFFFFF",
     alpha: 0,
   });
+  const [customTextColor, setCustomTextColor] = useState({
+    color: Storage.getItem("text_theme") || "#000000",
+    alpha: 0,
+  });
   const [colorssss, setColorssss] = useState("");
   const [colorboxssss, setColorboxssss] = useState("");
+  const [colortextssss, setColortextssss] = useState("");
 
   const handleColorClick = () => {
     setDisplayColorPicker(!displayColorPicker);
@@ -28,6 +34,10 @@ const SettingLayout = () => {
 
   const handleBoxColorClick = () => {
     setDisplayBoxColorPicker(!displayBoxColorPicker);
+  };
+
+  const handleTextColorClick = () => {
+    setDisplayTextColorPicker(!displayTextColorPicker);
   };
 
   React.useEffect(() => {
@@ -46,6 +56,10 @@ const SettingLayout = () => {
   }, [colorboxssss, Storage]);
 
   React.useEffect(() => {
+    setColortextssss(Storage.getItem("text_theme") || "white");
+  }, [colortextssss, Storage]);
+
+  React.useEffect(() => {
     setColorboxssss(customBoxColor.color);
     Storage.setItem("box_theme", customBoxColor.color);
   }, [customBoxColor]);
@@ -55,9 +69,14 @@ const SettingLayout = () => {
     Storage.setItem("theme", customColor.color);
   }, [customColor]);
 
+  React.useEffect(() => {
+    setColortextssss(customTextColor.color);
+    Storage.setItem("text_theme", customTextColor.color);
+  }, [customTextColor]);
+
   return (
     <S.SettingLayout color={colorssss}>
-      <S.Container color={colorboxssss}>
+      <S.Container color={colorboxssss} textColor={colortextssss}>
         <S.Title>셋튕페이쥐</S.Title>
         <S.ButtonWrap>
           <S.Button
@@ -97,6 +116,19 @@ const SettingLayout = () => {
             ColorBox={setCustomBoxColor}
             displayColorPicker={displayBoxColorPicker}
             setDisplayColorPicker={setDisplayBoxColorPicker}
+          />
+        </S.InputWrap>
+        <S.InputWrap>
+          <S.InputTitle>글자 컬러 조정</S.InputTitle>
+          <S.Input
+            value={customTextColor.color.toUpperCase()}
+            readOnly
+            onClick={handleTextColorClick}
+          />
+          <ColorPicker
+            ColorBox={setCustomTextColor}
+            displayColorPicker={displayTextColorPicker}
+            setDisplayColorPicker={setDisplayTextColorPicker}
           />
         </S.InputWrap>
         <button onClick={() => router.push("/")}>돌아가깅</button>

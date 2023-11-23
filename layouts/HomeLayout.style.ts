@@ -13,11 +13,12 @@ export const HomeLayouts = styled.div<{ color: string }>`
 
 export const ArrowImage = styled(Image)``;
 
-export const HomeContainer = styled.div<{ color: string }>`
+export const HomeContainer = styled.div<{ color: string; textColor: string }>`
   width: 70vw;
   height: 96vh;
   border-radius: 8px;
   background-color: ${({ color }) => color};
+  color: ${({ textColor }) => textColor};
   display: flex;
   flex-direction: column;
   align-items: center;

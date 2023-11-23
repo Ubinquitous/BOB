@@ -17,13 +17,15 @@ const HomeLayout = () => {
 
   const [color, setColor] = useState("");
   const [boxColor, setBoxColor] = useState("");
+  const [textColor, setTextColor] = useState("");
   const [align, setAlign] = useState("");
 
   React.useEffect(() => {
     setAlign(Storage.getItem("align") || "horizontal");
-    setColor(Storage.getItem("theme") || "#ffe5fb");
+    setColor(Storage.getItem("theme") || "#FFE5FB");
     setBoxColor(Storage.getItem("box_theme") || "#FFFFFF");
-  }, [Storage, color, boxColor, align]);
+    setTextColor(Storage.getItem("text_theme") || "#000000");
+  }, [Storage, color, boxColor, align, textColor]);
 
   const onAsyncGetMealInfo = async () => {
     return (
@@ -74,7 +76,7 @@ const HomeLayout = () => {
   return (
     <S.HomeLayouts color={color}>
       <S.ArrowImage onClick={handleDecreaseDay} src={Left} alt="" width={32} />
-      <S.HomeContainer color={boxColor}>
+      <S.HomeContainer color={boxColor} textColor={textColor}>
         <S.SettingButton onClick={() => router.push("/setting")}>
           세팅하깅
         </S.SettingButton>
@@ -83,7 +85,7 @@ const HomeLayout = () => {
           {meal &&
             meal.map((m, index) => (
               <S.HomeContainerMealBox key={index}>
-                <S.HomeContainerMealTitle color={color}>
+                <S.HomeContainerMealTitle color={textColor}>
                   {m.MMEAL_SC_NM}
                 </S.HomeContainerMealTitle>
                 <S.HomeContainerMealInfoBox>
